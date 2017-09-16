@@ -1,5 +1,5 @@
 // AlarmNode - to be used with AlarmHub and MQTT services
-// Copyright Kurt Bester
+// Copyright Kurt Bester 2017
 
 #include <avr/wdt.h>
 #include <UnoWiFiDevEd.h>
