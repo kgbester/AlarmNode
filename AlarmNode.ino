@@ -1,38 +1,40 @@
 // AlarmNode - to be used with AlarmHub and MQTT services
 // Copyright Kurt Bester 2017
 
+// Define the watchdog
 #include <avr/wdt.h>
-#include <UnoWiFiDevEd.h>
-#include <dht11.h>
-#include <elapsedMillis.h>
 
+// Define the DTH11 temperature and humidity sensor
+#include <dht11.h>
 dht11 DHT;
 #define DHT11_PIN 3
 
+// Define the timer
+#include <elapsedMillis.h>
 elapsedMillis timer0;
 #define interval 900000
 
-int redLED = 13;    // Motion detected LED
-int blueLED = 12;   // Sensing LED
-int PIR = 2;        // PIR sensor
-int pirState = LOW; // we start, assuming no motion detected
-int val = 0;        // variable for reading the pin status
-
-// MQTT definitions
+// Define MQTT topics
+#include <UnoWiFiDevEd.h>
 #define CONNECTOR "mqtt"
-#define TOPIC_ZONETRIGGER_PUB "home/alarm/zonetrigger"
-#define TOPIC_ZONE_PUB "home/alarm/state/zone1"
-#define TOPIC_ZONE_SUB "home/alarm/switch/zone1"
+#define TOPIC_TRIGGER_PUB "home/alarm/trigger"
 #define TOPIC_ALARM_PUB "home/alarm/state"
 #define TOPIC_ALARM_SUB "home/alarm/switch"
+#define TOPIC_ZONE_PUB "home/alarm/state/zone1"
+#define TOPIC_ZONE_SUB "home/alarm/switch/zone1"
 #define TOPIC_TEMPERATURE_PUB "home/temperature/zone1"
 #define TOPIC_HUMIDITY_PUB "home/humidity/zone1"
 #define SWITCH_ON "ON"
 #define SWITCH_OFF "OFF"
 
+// Define global variables
+int redLED = 13;        // Motion detected LED
+int blueLED = 12;       // Sensing LED
+int PIR = 2;            // PIR sensor
+int pirState = LOW;     // we start, assuming no motion detected
+int val = 0;            // variable for reading the pin status
 boolean alarm = false;
 boolean zone = false;
-
 int temperature = 0;
 int humidity = 0;
 
@@ -57,6 +59,7 @@ void setup()
 
 void loop()
 {
+  // Check the timer
   if (timer0 > interval)
   {
     timer0 -= interval; //reset the timer
@@ -78,7 +81,7 @@ void loop()
       digitalWrite(blueLED, HIGH); // turn LED ON
       mqttSend(TOPIC_ALARM_PUB, SWITCH_ON);
       mqttSend(TOPIC_ZONE_PUB, SWITCH_ON);
-      mqttSend(TOPIC_ZONETRIGGER_PUB, "");
+      mqttSend(TOPIC_TRIGGER_PUB, "");
     }
     else
     {
@@ -164,7 +167,7 @@ void CheckPIR()
       // We only want to print on the output change, not state
       pirState = HIGH;
       // Send a message to MQTT
-      mqttSend(TOPIC_ZONETRIGGER_PUB, "1");
+      mqttSend(TOPIC_TRIGGER_PUB, "1");
     }
   }
   else
